@@ -13,3 +13,6 @@ slurm-*.out
 mcsamples*.txt
 
 # user defined files
+
+# Mac OS Junk
+.DS*

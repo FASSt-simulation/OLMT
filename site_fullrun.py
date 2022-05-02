@@ -315,7 +315,10 @@ if (options.machine == ''):
        npernode = 8
    elif ('chrlogin' in hostname):
        options.machine = 'chrysalis'
-       npernode = 64    
+       npernode = 64 
+   elif ('modex' in hostname):
+       options.machine = 'modex'
+       npernode = 24       
    else:
        print('ERROR in site_fullrun.py:  Machine not specified.  Aborting')
        sys.exit(1)
@@ -332,6 +335,8 @@ elif ('anvil' in options.machine or 'chrysalis' in options.machine):
     ccsm_input = '/home/ccsm-data/inputdata'
 elif ('compy' in options.machine):
     ccsm_input = '/compyfs/inputdata/'
+elif ('modex' in options.machine):
+    ccsm_input = '/data/Model_Data/cesm_input_datasets'
 
 #if (options.compiler != ''):
 #    if (options.machine == 'titan'):
