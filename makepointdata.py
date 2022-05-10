@@ -79,6 +79,7 @@ if ('hcru' in options.res):
     resx = 0.5
     resy = 0.5
     domainfile_orig = ccsm_input+'/share/domains/domain.clm/domain.lnd.360x720_cruncep.100429.nc'
+    #domainfile_orig = ccsm_input+'/atm/datm7/atm_forcing.datm7.GSWP3.0.5d.v1.c170516/domain.lnd.360x720_gswp3.0v1.c170606.nc'
     if (options.mymodel == 'CLM5'):
         surffile_orig = ccsm_input+'/lnd/clm2/surfdata_map/surfdata_360x720cru_16pfts_Irrig_CMIP6_simyr1850_c170824.nc'
     elif (options.crop):

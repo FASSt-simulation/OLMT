@@ -16,3 +16,4 @@ mcsamples*.txt
 
 # Mac OS Junk
 .DS*
+._*

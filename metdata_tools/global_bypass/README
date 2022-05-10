@@ -1,6 +1,11 @@
 To complile on CADES:
 mpif90 makezones_reanalysis.f90 -I$NETCDF_PATH/include -L$NETCDF_PATH/lib -lnetcdff -lnetcdf
 
+To complile on MODEX:
+module load openmpi/4.1.2-gcc850 netcdf/4.8.1-gcc850-ompi412
+export NETCDF_PATH=/data/software/netcdf/4.8.1-gcc850-ompi412
+mpif90 makezones_reanalysis.f90 -I$NETCDF_PATH/include -L$NETCDF_PATH/lib -lnetcdff -lnetcdf -o makezones.exe
+
 To run:
 sbatch 
 

@@ -459,7 +459,9 @@ for row in AFdatareader:
           if (options.cruncepv8):
             endyear_trans=2016
           elif (options.gswp3):
-            endyear_trans=2014
+            #!!!! EDITED FOR MODEX TESTING
+            #endyear_trans=2014
+            endyear_trans=2010
           elif (options.gswp3_w5e5):
             endyear_trans=2019
           elif (options.princeton):

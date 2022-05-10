@@ -1,18 +1,10 @@
 #!/bin/bash -f
 #SBATCH --time=48:00:00
-#SBATCH -A ccsi
-#SBATCH -p batch
 #SBATCH --mem=32G
 #SBATCH --ntasks-per-node 32
 #SBATCH  --job-name=run.makezones
 #SBATCH  --nodes=1
 #SBATCH  --output=makezones 
 
-module unload python
-module unload scipy
-module unload numpy
-module load cray-netcdf
-module load python/2.7-anaconda
-module load nco
-cd  $HOME/models/metdata_tools/global_bypass
-mpirun -np 7 ./a.out
+module load openmpi/4.1.2-gcc850 netcdf/4.8.1-gcc850-ompi412
+mpirun -np 7 ./makezones.exe

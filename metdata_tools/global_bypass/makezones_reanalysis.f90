@@ -15,7 +15,7 @@ character(len=4) yst, startyrst, endyrst
 character(len=4) mst, myidst
 character(len=4) zst
 character(len=1) rst
-character(len=150) metvars, myforcing, forcdir, myres 
+character(len=150) metvars, myforcing, forcdir, myres, myforcing_output_pref, myforcing_output_dir
 character(len=300) fname, filename_base
 character(len=200) met_prefix
 real data_in(30,360,124)         !248
@@ -38,13 +38,16 @@ call MPI_Comm_rank(MPI_COMM_WORLD, myid, ierr)
 call MPI_Comm_size(MPI_COMM_WORLD, np, ierr)
 
 !Set the input data path
-forcdir = '/lustre/or-hydra/cades-ccsi/proj-shared/project_acme/ACME_inputdata/atm/datm7/atm_forcing.datm7.CRUJRA.0.5d.v1.c190604'
+!forcdir = '/lustre/or-hydra/cades-ccsi/proj-shared/project_acme/ACME_inputdata/atm/datm7/atm_forcing.datm7.CRUJRA.0.5d.v1.c190604'
+forcdir = '/data/Model_Data/cesm_input_datasets/atm/datm7/atm_forcing.datm7.GSWP3.0.5d.v1.c170516'
 !myforcing = 'cruncep.V8.c2017'
 !Set the directory of the forcing
-myforcing = 'CRUJRAV1.1.c2019.0.5x0.5'
+myforcing = 'GSWP3.c2011.0.5x0.5'
+myforcing_output_pref = 'GSWP3'
+myforcing_output_dir = 'cpl_bypass_full_1901_2014'
 !Set the date range and time resolution
 startyear = 1901
-endyear   = 2017
+endyear   = 2014
 res       = 6      !Timestep in hours
 
 
@@ -87,14 +90,17 @@ do v=myid+1,7,np
    if (v .eq. 7) metvars='WIND'
 
    startyear = 1901
-   endyear   = 2017
+   endyear   = 2014
    res       = 6
    write(rst,'(I1)') res
    myres = trim(rst) // 'Hrly'
  
-   if (v .eq. 1) met_prefix = trim(forcdir) // '/clmforc.' // trim(myforcing) // '.Prec.'
-   if (v .eq. 2) met_prefix = trim(forcdir) // '/clmforc.' // trim(myforcing) // '.Solr.'
-   if (v .ge. 3) met_prefix = trim(forcdir) // '/clmforc.' // trim(myforcing) // '.TPQWL.'
+   !if (v .eq. 1) met_prefix = trim(forcdir) // '/clmforc.' // trim(myforcing) // '.Prec.'
+   !if (v .eq. 2) met_prefix = trim(forcdir) // '/clmforc.' // trim(myforcing) // '.Solr.'
+   !if (v .ge. 3) met_prefix = trim(forcdir) // '/clmforc.' // trim(myforcing) // '.TPQWL.'
+   if (v .eq. 1) met_prefix = trim(forcdir) // '/Precip/clmforc.' // trim(myforcing) // '.Precip.'
+   if (v .eq. 1) met_prefix = trim(forcdir) // '/Solar/clmforc.' // trim(myforcing) // '.Solr.'
+   if (v .eq. 1) met_prefix = trim(forcdir) // '/TPHWL/clmforc.' // trim(myforcing) // '.TPQWL.'
 
    !CRU-NCEP v7
    !if (v .eq. 1) met_prefix = trim(forcdir) // '/atm_forcing.datm7.' &
@@ -170,7 +176,10 @@ do v=myid+1,7,np
          !do z=mod(myid,24)+1,24,np
             write(zst,'(I4)') 1000+z
             if (y .eq. startyear .and. m .eq. 1) then 
-               fname = trim(forcdir) // '/' // trim(myforcing) &
+               !fname = trim(forcdir) // '/' // trim(myforcing) &
+               !       // '_' // trim(metvars) // '_' // startyrst // '-' // endyrst // '_z' // &
+               !     zst(3:4) // '.nc'
+               fname = trim(forcdir) // '/' // trim(myforcing_output_dir) // '/' // trim(myforcing_output_pref) &
                       // '_' // trim(metvars) // '_' // startyrst // '-' // endyrst // '_z' // &
                     zst(3:4) // '.nc'
                ierr = nf90_create(trim(fname),cmode=or(nf90_clobber,nf90_64bit_offset),ncid=ncid_out(z))

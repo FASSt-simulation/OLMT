@@ -973,6 +973,7 @@ if (options.ny_ad != options.run_n and options.ad_spinup):
 elif (options.exit_spinup):
     options.run_n = 1
 
+#!!! EDITED here for modex and docker
 #create new case
 cmd = './create_newcase --case '+casedir+' --mach '+options.machine+' --compset '+ \
 	   options.compset+' --res '+options.res+' --mpilib '+ \
@@ -984,7 +985,10 @@ if (options.project != ''):
    cmd = cmd+' --project '+options.project
 if (options.compiler != ''):
    cmd = cmd+' --compiler '+options.compiler
-cmd = cmd+' > create_newcase.log'
+#!!! will this work now with the new internal permissions?  oh wait singularity is not writable
+#cmd = cmd+' > '+casedir+'/create_newcase.log'
+cmd = cmd
+print(os.getcwd())
 print(cmd)
 result = os.system(cmd)
 
@@ -1125,8 +1129,9 @@ if (options.maxpatch_pft != 17):
   xval = '-maxpft '+str(options.maxpatch_pft)+' '+xval
   os.system("./xmlchange --id CLM_BLDNML_OPTS --val '" + xval + "'")
 
+#!!! EDITED for modex & and Docker
 # for spinup and transient runs, PIO_TYPENAME is pnetcdf, which now not works well
-if('mac' in options.machine or 'cades' in options.machine): 
+if('mac' in options.machine or 'cades' in options.machine or 'modex' in options.machine): 
     os.system("./xmlchange --id PIO_TYPENAME --val netcdf ")
 
 
@@ -1510,8 +1515,9 @@ for i in range(1,int(options.ninst)+1):
                 else:
                     output.write(" metdata_type = 'gswp3'\n")
                     output.write(" metdata_bypass = '"+options.ccsm_input+"/atm/datm7/" \
-                          +"/atm_forcing.datm7.GSWP3.0.5d.v2.c180716/cpl_bypass_full'\n")
-#                         +"atm_forcing.datm7.GSWP3.0.5d.v1.c170516/cpl_bypass_full'\n")
+                            #!!!! EDITED for modex and docker - temporarily
+#                          +"/atm_forcing.datm7.GSWP3.0.5d.v2.c180716/cpl_bypass_full'\n")
+                         +"atm_forcing.datm7.GSWP3.0.5d.v1.c170516/cpl_bypass_full'\n")
             elif (options.gswp3_w5e5):
                 output.write(" metdata_type = 'gswp3_w5e5'\n")
                 output.write(" metdata_bypass = '"+options.ccsm_input+"/atm/datm7/" \
