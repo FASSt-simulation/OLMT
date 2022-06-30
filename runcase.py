@@ -2014,6 +2014,10 @@ if ((options.ensemble_file != '' or int(options.mc_ensemble) != -1) and (options
               output_run.write('conda activate ${conda_env}'+'\n')
               # load modules
               output_run.write('module load hdf5/1.12.1-gcc850 netcdf/4.8.1-gcc850'+'\n')
+              # other options for optimizing mpi
+              output_run.write('export OMPI_MCA_rmaps_base_oversubscribe=1'+'\n')
+              output_run.write('export PMIX_MCA_gds=hash'+'\n')
+              output_run.write('\n')
               output_run.write('echo "Start job :"`date`'+'\n')
         output_run.write("\n")
         if (options.machine == 'eos'):
@@ -2091,6 +2095,7 @@ if ((options.ensemble_file != '' or int(options.mc_ensemble) != -1) and (options
         if (options.spruce_treatments):
             cmd = cmd + ' --spruce_treatments'
         output_run.write(cmd+'\n')
+        output_run.write('echo "Stop job :"`date`'+'\n')
         output_run.close()
 
         if (options.no_submit == False):

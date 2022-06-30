@@ -449,6 +449,10 @@ else:
                   if os.path.isfile(exedir+'/acme.exe'):
                      os.system(exedir+'/acme.exe > acme_log.txt')
                   elif os.path.isfile(exedir+'/e3sm.exe'):
+                     print("**** Starting model run! ****")
+                     cw_directory = os.getcwd()
+                     #os.system('chmod 777 -R '+cw_directory)
+                     print(cw_directory)
                      os.system(exedir+'/e3sm.exe > e3sm_log.txt')
                   elif os.path.isfile(exedir+'/cesm.exe'):
                      os.system(exedir+'/cesm.exe > cesm_log.txt')
