@@ -329,7 +329,10 @@ if (options.machine == ''):
        npernode = 8
    elif ('chrlogin' in hostname):
        options.machine = 'chrysalis'
-       npernode = 64    
+       npernode = 64
+   elif ('modex' in hostname):
+       options.machine = 'modex'
+       npernode = 24       
    else:
        print('ERROR in site_fullrun.py:  Machine not specified.  Aborting')
        sys.exit(1)
@@ -346,6 +349,8 @@ elif ('anvil' in options.machine or 'chrysalis' in options.machine):
     ccsm_input = '/home/ccsm-data/inputdata'
 elif ('compy' in options.machine):
     ccsm_input = '/compyfs/inputdata/'
+elif ('modex' in options.machine):
+    ccsm_input = '/data/Model_Data/cesm_input_datasets'
 
 #if (options.compiler != ''):
 #    if (options.machine == 'titan'):
@@ -1088,7 +1093,7 @@ for row in AFdatareader:
             mysubmit_type = 'qsub'
             groupnum = int(sitenum/npernode)
             if ('cades' in options.machine or 'anvil' in options.machine or 'chrysalis' in options.machine or \
-                'compy' in options.machine or 'cori' in options.machine):
+                'compy' in options.machine or 'cori' in options.machine or 'modex' in options.machine):
                 mysubmit_type = 'sbatch'
             if ('ubuntu' in options.machine):
                 mysubmit_type = ''
@@ -1120,7 +1125,8 @@ for row in AFdatareader:
                         if ('cades' in options.machine \
                             or 'mymac' in options.machine \
                             or 'wsl' in options.machine \
-                            or 'docker' in options.machine):
+                            or 'docker' in options.machine \
+                            or 'modex' in options.machine):
                           output.write("#!/bin/bash -f\n")
                         else:
                           output.write("#!/bin/csh -f\n")
