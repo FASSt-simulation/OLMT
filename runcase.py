@@ -427,6 +427,8 @@ elif ('compy' in options.machine):
     ppn=40
 elif ('chrysalis' in options.machine):
     ppn=64
+elif ('modex' in options.machine):
+    ppn=24
 if (options.ensemble_file == ''):
   ppn=min(ppn, int(options.np))
 
@@ -857,7 +859,7 @@ else:
     myncap = 'ncap'
     if ('cades' in options.machine or 'chrysalis' in options.machine or 'compy' in options.machine or 'ubuntu' in options.machine \
           or 'wsl' in options.machine \
-          or 'mymac' in options.machine or 'anvil' in options.machine):
+          or 'mymac' in options.machine or 'anvil' in options.machine or 'modex' in options.machine):
       myncap='ncap2'
 
     flnr = nffun.getvar(tmpdir+'/clm_params.nc','flnr')
@@ -1159,7 +1161,8 @@ if (options.maxpatch_pft != 17):
 
 # for spinup and transient runs, PIO_TYPENAME is pnetcdf, which now not works well
 if('mymac' in options.machine or 'cades' in options.machine \
-   or 'wsl' in options.machine or 'docker' in options.machine): 
+   or 'wsl' in options.machine or 'docker' in options.machine \
+   or 'modex' in options.machine): 
     os.system("./xmlchange --id PIO_TYPENAME --val netcdf ")
 
 
@@ -1948,7 +1951,7 @@ if ((options.ensemble_file != '' or int(options.mc_ensemble) != -1) and (options
     #Launch ensemble if requested 
     mysubmit_type = 'qsub'
     if ('cades' in options.machine or 'compy' in options.machine or 'ubuntu' in options.machine or 'cori' in options.machine or \
-        options.machine == 'anvil' or options.machine == 'edison' or options.machine == 'chrysalis'):
+        options.machine == 'anvil' or options.machine == 'edison' or options.machine == 'chrysalis' or options.machine == 'modex'):
         mysubmit_type = 'sbatch'
     if (options.ensemble_file != ''):
         os.system('mkdir -p '+PTCLMdir+'/scripts/'+myscriptsdir)
@@ -1959,7 +1962,9 @@ if ((options.ensemble_file != '' or int(options.mc_ensemble) != -1) and (options
            timestr='00:30:00'
            if ('compy' in options.machine):
              timestr='02:00:00'
-        output_run.write("#!/bin/csh -f\n")
+        # !!! EDITED TO RUN ON MODEX - hard coding this change for now !!!
+        #output_run.write("#!/bin/csh -f\n")
+        output_run.write("#!/bin/bash -f\n")
         if (mysubmit_type == 'qsub'):
             output_run.write('#PBS -l walltime='+timestr+'\n')
             output_run.write('#PBS -N ens_'+casename+'\n')
@@ -1995,6 +2000,21 @@ if ((options.ensemble_file != '' or int(options.mc_ensemble) != -1) and (options
             if ('anvil' in options.machine):
               output_run.write('#SBATCH -A condo\n')
               output_run.write('#SBATCH -p acme-small\n')
+            # !!! EDITED for modex. for now hard-coding email address !!!
+            if ('modex' in options.machine):
+              output_run.write('#SBATCH --mail-type=ALL'+'\n')
+              output_run.write('#SBATCH --mail-user=sserbin@bnl.gov'+'\n')
+              output_run.write('\n')
+              output_run.write('\n')
+              # load conda env
+              # !!! This is messy but for now is one way to make these scripts run !!!
+              output_run.write('conda_env=/data2/sserbin/conda_envs/olmt'+'\n')
+              output_run.write('conda_base_env=/home/sserbin/miniconda3/'+'\n')
+              output_run.write('source ${conda_base_env}etc/profile.d/conda.sh'+'\n')
+              output_run.write('conda activate ${conda_env}'+'\n')
+              # load modules
+              output_run.write('module load hdf5/1.12.1-gcc850 netcdf/4.8.1-gcc850'+'\n')
+              output_run.write('echo "Start job :"`date`'+'\n')
         output_run.write("\n")
         if (options.machine == 'eos'):
             output_run.write('source $MODULESHOME/init/csh\n')
@@ -2055,6 +2075,12 @@ if ((options.ensemble_file != '' or int(options.mc_ensemble) != -1) and (options
                ' --site '+options.site+' --model_name '+model_name
         elif ('anvil' in options.machine or 'cori' in options.machine or 'chrysalis' in options.machine):
             cmd = 'srun -n '+str(np_total)+' python manage_ensemble.py ' \
+               +'--case '+casename+' --runroot '+runroot+' --n_ensemble '+str(nsamples)+' --ens_file '+ \
+               options.ensemble_file+' --exeroot '+exeroot+' --parm_list '+options.parm_list+' --cnp '+cnp + \
+               ' --site '+options.site+' --model_name '+model_name
+        elif ('modex' in options.machine):
+            mpicmd = 'mpirun'
+            cmd = mpicmd+' -np '+str(np_total)+' python3.9 manage_ensemble.py ' \
                +'--case '+casename+' --runroot '+runroot+' --n_ensemble '+str(nsamples)+' --ens_file '+ \
                options.ensemble_file+' --exeroot '+exeroot+' --parm_list '+options.parm_list+' --cnp '+cnp + \
                ' --site '+options.site+' --model_name '+model_name

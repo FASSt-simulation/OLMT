@@ -1,0 +1,10 @@
+#!/bin/bash -f
+#SBATCH --time=60:00:00
+#SBATCH --mem=62G
+#SBATCH --ntasks-per-node 32
+#SBATCH  --job-name=run.makezones
+#SBATCH  --nodes=1
+#SBATCH  --output=makezones.log 
+
+module load openmpi/4.1.2-gcc850 netcdf/4.8.1-gcc850-ompi412
+mpirun -np 15 ./makezones.exe
