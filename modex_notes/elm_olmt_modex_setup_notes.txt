@@ -1,9 +1,29 @@
 ###### SETUP NOTES
 
-Step 1. 
+Step 1. Create a new work environment for running OLMT and containing the ELM model source code 
 
-Step 2.
+Step 2. Clone the "fasst" branch of OLMT
 
-Step 3.
+OLMT branch source: https://github.com/FASSt-simulation/OLMT/tree/fasst
 
-Step 4. 
+git clone -c http.sslVerify=false -b fasst https://github.com/FASSt-simulation/OLMT
+
+# Confirm you have the correct branch
+git branch
+
+Step 3. Download the ELM model source code. A handy script is provided in OLMT: OLMT/modex_notes 
+
+# Go into the OLMT directory
+cd OLMT
+
+# Define your work environment and supply to the script as an argument
+sh modex_notes/download_elm_source.sh /path/to/work/environment/elmlocation
+
+Step 4. Place a copy of the cime machines files in your how working environment. A copy of the modex machines files are in OLMT.
+
+cd OLMT
+cp -r modex_notes/cime ~/.cime
+
+Step 5. Run a basic OLMT simulation as a test
+
+READ the instructions in OLMT/modex_notes/basic_run.txt
