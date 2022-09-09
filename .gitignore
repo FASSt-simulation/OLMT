@@ -14,4 +14,6 @@ mcsamples*.txt
 
 # user defined files
 ._*
+
+# MacOSX files
 .DS_Store

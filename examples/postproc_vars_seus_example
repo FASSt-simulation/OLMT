@@ -1,9 +1,8 @@
-#Variable Startyear endyear Startday endday averaging period factor add offset
-GPP		2000    2009	1	365	3650	1	0
+#Variable   Startyear endyear Startday endday averaging period factor add offset
+GPP		         2000    2009	1	      365	  3650	     1	    0
 NEE		2000    2009	1       365     3650    1       0
 NPP		2000    2009	1       365     3650    1       0
 EFLX_LH_TOT	2000    2009	1       365     3650    1       0
 BTRAN		2000	2009	1	365     3650	1	0
 TOTVEGC		2000    2009    1       365     3650    1       0
 TLAI		2000    2009    1       365     3650    1       0
-

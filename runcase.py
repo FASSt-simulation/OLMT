@@ -75,9 +75,6 @@ parser.add_option("--compset", dest="compset", default='I1850CNPRDCTCBC', \
                          "Currently supports ONLY *CLM45(CN) compsets")
 
 
-
-
-
 parser.add_option("--istrans", dest="istrans", default=False, action="store_true",\
                  help="Force compset to act like transient")
 parser.add_option("--lat_bounds", dest="lat_bounds", default='-999,-999', \
@@ -149,18 +146,24 @@ parser.add_option("--monthly_metdata", dest="monthly_metdata", default = '', \
                   help = "File containing met data (cpl_bypass only)")
 parser.add_option("--add_temperature", dest="addt", default=0.0, \
                   help = 'Temperature to add to atmospheric forcing')
+parser.add_option("--scale_rain", dest="sclr", default=1.0, \
+                  help = 'Scaling factor to apply to rain in atmospheric forcing')
+parser.add_option("--scale_snow", dest="scls", default=1.0, \
+                  help = 'Scaling factor to apply to snowfall in atmospheric forcing')
 parser.add_option("--co2_file", dest="co2_file", default="fco2_datm_rcp4.5_1765-2500_c130312.nc", \
                   help = 'CLM timestep (hours)')
 parser.add_option("--add_co2", dest="addco2", default=0.0, \
                   help = 'CO2 (ppmv) to add to atmospheric forcing')
 parser.add_option("--startdate_add_temperature", dest="sd_addt", default="99991231", \
                   help = 'Date (YYYYMMDD) to begin addding temperature')
+parser.add_option("--startdate_scale_rain", dest="sd_sclr", default="99991231", \
+                  help = 'Date (YYYYMMDD) to begin scaling rain')
+parser.add_option("--startdate_scale_snow", dest="sd_scls", default="99991231", \
+                  help = 'Date (YYYYMMDD) to begin scaling snowfall')
 parser.add_option("--startdate_add_co2", dest="sd_addco2", default="99991231", \
                   help = 'Date (YYYYMMDD) to begin addding CO2')
 
 # surface data
-
-
 parser.add_option("--daymet4", dest="daymet4", default=False, \
                   action="store_true", help = "Daymet v4 downscaled GSWP3-v2 forcing with user-provided domain and surface data)")
 parser.add_option("--ad_spinup", action="store_true", \
@@ -217,6 +220,8 @@ parser.add_option("--align_year", dest="align_year", default=-999, \
                   help = 'Alignment year (transient run only)')
 parser.add_option("--np", dest="np", default=1, \
                   help = 'number of processors')
+parser.add_option("--ppn", dest="ppn", default=1, \
+                  help = 'processors per node for user-known machine' )
 parser.add_option("--ninst", dest="ninst", default=1, \
                   help = 'number of land model instances')
 parser.add_option("--ng", dest="ng", default=64, \
@@ -327,11 +332,17 @@ parser.add_option("--walltime", dest="walltime", default=6, \
                   help = "desired walltime for each job (hours)")
 parser.add_option("--lai", dest="lai", default=-999, \
                   help = 'Set constant LAI (SP mode only)')
-parser.add_option("--maxpatch_pft", dest="maxpatch_pft", default=17, \
-                  help = "user-defined max. patch PFT number, default is 17")
 parser.add_option("--landusefile", dest="pftdynfile", default='', \
                   help='user-defined dynamic PFT file')
 parser.add_option("--var_list_pft", dest="var_list_pft", default="",help='Comma-separated list of vars to output at PFT level')
+
+# for ngee-arctic but generic
+parser.add_option("--maxpatch_pft", dest="maxpatch_pft", default=17, \
+                  help = "user-defined max. patch PFT number, default is 17")
+parser.add_option("--megan", dest="megan", default=False, action="store_true", \
+                  help = "switch on MEGAN namelist option, default is False")
+parser.add_option("--drydep", dest="drydep", default=False, action="store_true", \
+                  help = "switch on DryDep namelist option, default is False")
 
 #options for coupling with PFLOTRAN
 parser.add_option("--clmpf_source_dir", dest="clmpf_source_dir", default='', \
@@ -429,6 +440,8 @@ elif ('chrysalis' in options.machine):
     ppn=64
 elif ('modex' in options.machine):
     ppn=24
+elif (int(options.ppn)>1):
+    ppn=int(options.ppn)
 if (options.ensemble_file == ''):
   ppn=min(ppn, int(options.np))
 
@@ -1155,9 +1168,27 @@ if (options.rest_n > 0):
 # user-defined PFT numbers (default is 17)
 if (options.maxpatch_pft != 17):
   print('resetting maxpatch_pft to '+str(options.maxpatch_pft))
-  xval = subprocess.check_output('./xmlquery --value CLM_BLDNML_OPTS', cwd=casedir, shell=True)
+  xval = subprocess.check_output('./xmlquery --value '+mylsm+'_BLDNML_OPTS', cwd=casedir, shell=True)
+  xval = xval.decode()
   xval = '-maxpft '+str(options.maxpatch_pft)+' '+xval
-  os.system("./xmlchange --id CLM_BLDNML_OPTS --val '" + xval + "'")
+  os.system("./xmlchange --id "+mylsm+"_BLDNML_OPTS --val '" + xval + "'")
+
+# switch on MEGAN (voc model) (default is False)
+if (options.megan):
+  print('MEGAN namelist is on ')
+  xval = subprocess.check_output('./xmlquery --value '+mylsm+'_BLDNML_OPTS', cwd=casedir, shell=True)
+  xval = xval.decode()
+  xval = xval + ' -megan '
+  os.system("./xmlchange --id "+mylsm+"_BLDNML_OPTS --val '" + xval + "'")
+
+# switch on DryDep (default is False)
+if (options.drydep):
+  print('Drydep namelist is on ')
+  xval = subprocess.check_output('./xmlquery --value '+mylsm+'_BLDNML_OPTS', cwd=casedir, shell=True)
+  xval = xval.decode()
+  xval = xval + ' -drydep '
+  os.system("./xmlchange --id "+mylsm+"_BLDNML_OPTS --val '" + xval + "'")
+
 
 # for spinup and transient runs, PIO_TYPENAME is pnetcdf, which now not works well
 if('mymac' in options.machine or 'cades' in options.machine \
@@ -1614,6 +1645,14 @@ for i in range(1,int(options.ninst)+1):
       output.write(" add_temperature = "+str(options.addt)+"\n")
       output.write(" startdate_add_temperature = '"+str(options.sd_addt)+"'\n")
 
+    if (options.sclr != 1.0):
+      output.write(" scale_rain = "+str(options.sclr)+"\n")
+      output.write(" startdate_scale_rain = '"+str(options.sd_sclr)+"'\n")
+
+    if (options.scls != 1.0):
+      output.write(" scale_snow = "+str(options.scls)+"\n")
+      output.write(" startdate_scale_snow = '"+str(options.sd_scls)+"'\n")
+    
     if (options.addco2 != 0):
       output.write(" add_co2 = "+str(options.addco2)+"\n")
       output.write(" startdate_add_co2 = '"+str(options.sd_addco2)+"'\n")
@@ -2008,6 +2047,7 @@ if ((options.ensemble_file != '' or int(options.mc_ensemble) != -1) and (options
               output_run.write('\n')
               # load conda env
               # !!! This is messy but for now is one way to make these scripts run !!!
+              # !!! NEED TO REMOVE THE HARDCODED PATHS FOR CONDA TO A GENERAL LOCATION ON MODEX !!!
               output_run.write('conda_env=/data2/sserbin/conda_envs/olmt'+'\n')
               output_run.write('conda_base_env=/home/sserbin/miniconda3/'+'\n')
               output_run.write('source ${conda_base_env}etc/profile.d/conda.sh'+'\n')
@@ -2059,7 +2099,7 @@ if ((options.ensemble_file != '' or int(options.mc_ensemble) != -1) and (options
         cnp = 'True'
         if (options.cn_only or options.c_only):
             cnp= 'False'
-        if ('oic' in options.machine or 'cades' in options.machine or 'ubuntu' in options.machine):
+        if ('oic' in options.machine or 'cades' in options.machine or 'ubuntu' in options.machine or 'docker' in options.machine):
             mpicmd = 'mpirun'
             if ('cades' in options.machine):
                 mpicmd = '/software/dev_tools/swtree/cs400_centos7.2_pe2016-08/openmpi/1.10.3/centos7.2_gnu5.3.0/bin/mpirun'

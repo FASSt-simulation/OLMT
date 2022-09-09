@@ -1,0 +1,84 @@
+export OMPI_MCA_rmaps_base_oversubscribe=1
+export OMP_NUM_THREADS=1
+export PMIX_MCA_gds=hash
+
+conda activate /data2/sserbin/conda_envs/olmt
+module load hdf5/1.12.1-gcc850 netcdf/4.8.1-gcc850
+
+# US-Dk3 with MEGAN turned on
+python3.9 site_fullrun.py \
+--site US-Dk3 --sitegroup SoutheastUS --caseidprefix SoutheastUS --nyears_ad_spinup 200 \
+--nyears_final_spinup 400 --tstep 1 --cpl_bypass --spinup_vars --compiler gnu --mpilib mpi-serial \
+--gswp3 --megan --parm_list examples/parm_list_seus_example \
+--mc_ensemble 10 --ng 24 --model_root /data/sserbin/Modeling/FASSt-simulation/E3SM \
+--caseroot /data2/Model_Output/olmt_ldrd_simulations \
+--runroot /data2/Model_Output/olmt_ldrd_simulations \
+--ccsm_input /data/Model_Data/cesm_input_datasets \
+--no_submit --machine modex
+
+
+
+
+
+
+
+
+
+
+### OLD
+
+python3.9 site_fullrun.py \
+--site US-Dk3 --sitegroup SoutheastUS --caseidprefix SoutheastUS --nyears_ad_spinup 200 \
+--nyears_final_spinup 400 --tstep 1 --cpl_bypass --spinup_vars --compiler gnu --mpilib mpi-serial \
+--gswp3 --parm_list examples/parm_list_seus_example --postproc_file examples/postproc_vars_seus_example \
+--mc_ensemble 200 --ng 24 --model_root /data/sserbin/Modeling/FASSt-simulation/E3SM \
+--caseroot /data2/Model_Output/olmt_seus_ens_2 \
+--runroot /data2/Model_Output/olmt_seus_ens_2 \
+--ccsm_input /data/Model_Data/cesm_input_datasets \
+--no_submit --machine modex
+
+
+
+python3.9 site_fullrun.py \
+--site US-LL1 --sitegroup SoutheastUS --caseidprefix SoutheastUS --nyears_ad_spinup 200 \
+--nyears_final_spinup 400 --tstep 1 --cpl_bypass --spinup_vars --compiler gnu --mpilib mpi-serial \
+--gswp3 --parm_list examples/parm_list_seus_example --postproc_file examples/postproc_vars_seus_example \
+--mc_ensemble 200 --ng 24 --model_root /data/sserbin/Modeling/FASSt-simulation/E3SM \
+--caseroot /data2/Model_Output/olmt_seus_ens_2 \
+--runroot /data2/Model_Output/olmt_seus_ens_2 \
+--ccsm_input /data/Model_Data/cesm_input_datasets \
+--no_submit --machine modex
+
+python3.9 site_fullrun.py \
+--site US-MMS --sitegroup SoutheastUS --caseidprefix SoutheastUS --nyears_ad_spinup 200 \
+--nyears_final_spinup 400 --tstep 1 --cpl_bypass --spinup_vars --compiler gnu --mpilib mpi-serial \
+--gswp3 --parm_list examples/parm_list_seus_example --postproc_file examples/postproc_vars_seus_example \
+--mc_ensemble 200 --ng 48 --model_root /data/sserbin/Modeling/FASSt-simulation/E3SM \
+--caseroot /data2/Model_Output/olmt_seus_ens_2 \
+--runroot /data2/Model_Output/olmt_seus_ens_2 \
+--ccsm_input /data/Model_Data/cesm_input_datasets \
+--no_submit --machine modex
+
+# RUN THE ENSEMBLES
+export OMPI_MCA_rmaps_base_oversubscribe=1
+module load openmpi/4.1.4-gcc850
+
+#spinup
+sbatch --ntasks=24 scripts/SoutheastUS/ensemble_run_SoutheastUS_US-Dk3_ICB1850CNRDCTCBC_ad_spinup.pbs
+#final spinup
+sbatch --ntasks=24 scripts/SoutheastUS/ensemble_run_SoutheastUS_US-Dk3_ICB1850CNPRDCTCBC.pbs
+#transient
+sbatch --ntasks=24 scripts/SoutheastUS/ensemble_run_SoutheastUS_US-Dk3_ICB20TRCNPRDCTCBC.pbs
+
+
+# ------- OLD
+#spinup
+sbatch --cpus-per-task=24 scripts/SoutheastUS/ensemble_run_SoutheastUS_US-Dk3_ICB1850CNRDCTCBC_ad_spinup.pbs
+#final spinup
+sbatch --cpus-per-task=24 scripts/SoutheastUS/ensemble_run_SoutheastUS_US-Dk3_ICB1850CNPRDCTCBC.pbs
+#transient
+sbatch --cpus-per-task=24 scripts/SoutheastUS/ensemble_run_SoutheastUS_US-Dk3_ICB20TRCNPRDCTCBC.pbs
+
+
+# other example
+sbatch -w node01,node03 --cpus-per-task=24 scripts/SoutheastUS/ensemble_run_SoutheastUS_US-Dk3_ICB1850CNRDCTCBC_ad_spinup.pbs

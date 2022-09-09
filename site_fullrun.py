@@ -65,6 +65,8 @@ parser.add_option("--machine", dest="machine", default = '', \
                   help = "machine to use")
 parser.add_option("--np", dest="np", default=1, \
                   help = 'number of processors')
+parser.add_option("--ppn", dest="ppn", default=1, \
+                  help = 'processors per node for user-known machine' )
 parser.add_option("--walltime", dest="walltime", default=6, \
                   help = "desired walltime for each job (hours)")
 parser.add_option("--pio_version", dest="pio_version", default='2', \
@@ -124,6 +126,14 @@ parser.add_option("--add_temperature", dest="addt", default=0.0, \
                   help = 'Temperature to add to atmospheric forcing')
 parser.add_option("--startdate_add_temperature", dest="sd_addt", default="99991231", \
                   help = 'Date (YYYYMMDD) to begin addding temperature')
+parser.add_option("--scale_rain", dest="sclr", default=1.0, \
+                  help = 'Scaling factor to apply to rain in atmospheric forcing')
+parser.add_option("--startdate_scale_rain", dest="sd_sclr", default="99991231", \
+                  help = 'Date (YYYYMMDD) to begin scaling rain')
+parser.add_option("--scale_snow", dest="scls", default=1.0, \
+                  help = 'Scaling factor to apply to snowfall in atmospheric forcing')
+parser.add_option("--startdate_scale_snow", dest="sd_scls", default="99991231", \
+                  help = 'Date (YYYYMMDD) to begin scaling snowfall')
 # surface data
 parser.add_option("--surfdata_grid", dest="surfdata_grid", default=False, action="store_true", \
                   help = 'Use gridded surface data instead of site data')
@@ -234,6 +244,10 @@ parser.add_option("--maxpatch_pft", dest="maxpatch_pft", default=17, \
                   help = "user-defined max. patch PFT number, default is 17")
 parser.add_option("--landusefile", dest="pftdynfile", default='', \
                   help='user-defined dynamic PFT file')
+parser.add_option("--megan", dest="megan", default=False, action="store_true", \
+                  help = "switch on MEGAN namelist option, default is False")
+parser.add_option("--drydep", dest="drydep", default=False, action="store_true", \
+                  help = "switch on DryDep namelist option, default is False")
 
 parser.add_option("--var_list_pft", dest="var_list_pft", default="",help='Comma-separated list of vars to output at PFT level')
 parser.add_option("--dryrun",dest="dryrun",default=False,action="store_true",help="Do not execute commands")
@@ -625,6 +639,12 @@ for row in AFdatareader:
         if (options.addt != 0):
             basecmd = basecmd+' --add_temperature '+str(options.addt)
             basecmd = basecmd+' --startdate_add_temperature '+str(options.sd_addt)
+        if (options.sclr != 1.0):
+            basecmd = basecmd+' --scale_rain '+str(options.sclr)
+            basecmd = basecmd+' --startdate_scale_rain '+str(options.sd_sclr)
+        if (options.scls != 1.0):
+            basecmd = basecmd+' --scale_snow '+str(options.scls)
+            basecmd = basecmd+' --startdate_scale_snow '+str(options.sd_scls)
         if (options.addco2 != 0):
             basecmd = basecmd+' --add_co2 '+str(options.addco2)
             basecmd = basecmd+' --startdate_add_co2 '+str(options.sd_addco2)
@@ -632,6 +652,7 @@ for row in AFdatareader:
             basecmd = basecmd+' --surffile '+options.surffile      
         basecmd = basecmd + ' --ng '+str(options.ng)
         basecmd = basecmd + ' --np '+str(options.np)
+        basecmd = basecmd + ' --ppn '+str(options.ppn)
         basecmd = basecmd + ' --tstep '+str(options.tstep)
         basecmd = basecmd + ' --co2_file '+options.co2_file
         if (options.aerorcp85):
@@ -649,12 +670,14 @@ for row in AFdatareader:
           basecmd = basecmd+' --constraints '+options.constraints
         if (options.hist_vars != ''):
           basecmd = basecmd+' --hist_vars '+options.hist_vars
-
         if (options.maxpatch_pft!=17):
             basecmd = basecmd + ' --maxpatch_pft '+options.maxpatch_pft
         if (options.pftdynfile != ''):
             basecmd = basecmd + ' --landusefile '+options.pftdynfile
-
+        if (options.megan):
+            basecmd = basecmd + ' --megan'
+        if (options.drydep):
+            basecmd = basecmd + ' --drydep'
         if (options.var_soilthickness):
             basecmd = basecmd + ' --var_soilthickness'
         if (options.var_list_pft != ''):
